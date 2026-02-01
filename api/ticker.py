@@ -82,7 +82,7 @@ class handler(BaseHTTPRequestHandler):
             
             # Prepare recent news (last 8 items - most recent first)
             recent_news = []
-            for item in news_items[:8]:  # take most recent 8
+            for item in news_items[:11]:
                 content = item.get('content', {})
                 click_url = content.get('clickThroughUrl', {}) or {}
                 
@@ -91,8 +91,7 @@ class handler(BaseHTTPRequestHandler):
                     "summary": content.get('summary') or content.get('description') or "",
                     "pubDate": content.get('pubDate'),
                     "provider": content.get('provider', {}).get('displayName'),
-                    "url": click_url.get('url'),
-                    "isPremium": content.get('finance', {}).get('premiumFinance', {}).get('isPremiumNews', False)
+                    "source_url": click_url.get('url'),
                 }
                 recent_news.append(news_entry)
                 
