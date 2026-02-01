@@ -90,6 +90,7 @@ class handler(BaseHTTPRequestHandler):
             # Organize data into structured categories
             organized_data = {
                 "ticker": ticker_symbol.upper(),
+                "shortName": info.get('shortName'),
                 "timestamp": info.get('regularMarketTime'),
                 
                 "main_info": {
@@ -99,8 +100,8 @@ class handler(BaseHTTPRequestHandler):
                     "industry": info.get('industry'),
                     "currency": info.get('currency'),
                     "currentPrice": format_number(current_price, 2),
-                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None,
-                    "fiftyTwoWeekChange": fifty_two_week_change_pct
+                    "oneDayChange": f"{one_day_change} %" if one_day_change is not None else None,
+                    "fiftyTwoWeekChange": fifty_two_week_change_pct,
                     "marketCap": format_billions(info.get('marketCap')),
                     "PS": format_number(info.get('priceToSalesTrailing12Months'), 2),
                     "PE": format_number(info.get('trailingPE'), 2),
@@ -256,8 +257,7 @@ class handler(BaseHTTPRequestHandler):
                     "mostRecentQuarter": info.get('mostRecentQuarter'),
                     "netIncomeToCommon": format_billions(info.get('netIncomeToCommon')),
                     "trailingPegRatio": format_number(info.get('trailingPegRatio'), 2)
-                }
-            }
+                },
             
                 "company_business": {
                     "logo_url": info.get('logo_url'),
@@ -267,6 +267,7 @@ class handler(BaseHTTPRequestHandler):
                     "industry": info.get('industry'),
                     "website": info.get('website'),
                 },
+            }
                 
             
             # Send response
