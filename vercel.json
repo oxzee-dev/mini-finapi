@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/ticker.py": {
-      "runtime": "@vercel/python@3.9.0"
-    }
-  }
-}
