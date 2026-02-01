@@ -1,14 +1,9 @@
 {
+  "version": 2,
   "builds": [
     {
-      "src": "api/*.py",
+      "src": "api/ticker.py",
       "use": "@vercel/python"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
     }
   ]
 }
