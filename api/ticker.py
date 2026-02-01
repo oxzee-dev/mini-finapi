@@ -95,8 +95,12 @@ class handler(BaseHTTPRequestHandler):
                 "main_info": {
                     "symbol": info.get('symbol'),
                     "shortName": info.get('shortName'),
-                    "currentPrice": format_number(current_price, 2),
+                    "sector": info.get('sector'),
+                    "industry": info.get('industry'),
                     "currency": info.get('currency'),
+                    "currentPrice": format_number(current_price, 2),
+                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None,
+                    "fiftyTwoWeekChange": fifty_two_week_change_pct
                     "marketCap": format_billions(info.get('marketCap')),
                     "PS": format_number(info.get('priceToSalesTrailing12Months'), 2),
                     "PE": format_number(info.get('trailingPE'), 2),
@@ -104,12 +108,9 @@ class handler(BaseHTTPRequestHandler):
                     "recommendation": info.get('recommendationKey'),
                     "PT_Low": format_number(info.get('targetLowPrice'), 2),
                     "PT_High": format_number(info.get('targetHighPrice'), 2),
-                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None,
-                    "fiftyTwoWeekChange": fifty_two_week_change_pct
                 },
                 
                 "company_info": {
-                    "longBusinessSummary": info.get('longBusinessSummary'),
                     "website": info.get('website'),
                     "address1": info.get('address1'),
                     "city": info.get('city'),
@@ -122,19 +123,6 @@ class handler(BaseHTTPRequestHandler):
                     "industryKey": info.get('industryKey'),
                     "sectorKey": info.get('sectorKey'),
                     "fullTimeEmployees": info.get('fullTimeEmployees')
-                },
-                
-                "card": {
-                    "logo_url": info.get('logo_url'),
-                    "shortName": info.get('shortName'),
-                    "symbol": info.get('symbol'),
-                    "currentPrice": format_number(current_price, 2),
-                    "currency": info.get('currency'),
-                    "marketCap": format_billions(info.get('marketCap')),
-                    "sector": info.get('sector'),
-                    "industry": info.get('industry'),
-                    "website": info.get('website'),
-                    "exchange": info.get('exchange')
                 },
                 
                 "valuation": {
@@ -225,6 +213,23 @@ class handler(BaseHTTPRequestHandler):
                     "operatingCashflow": format_billions(info.get('operatingCashflow'))
                 },
                 
+                "trading_info": {
+                    "volume": info.get('volume'),
+                    "regularMarketVolume": info.get('regularMarketVolume'),
+                    "averageVolume": info.get('averageVolume'),
+                    "averageVolume10days": info.get('averageVolume10days'),
+                    "averageDailyVolume10Day": info.get('averageDailyVolume10Day'),
+                    "bid": format_number(info.get('bid'), 2),
+                    "ask": format_number(info.get('ask'), 2),
+                    "bidSize": info.get('bidSize'),
+                    "askSize": info.get('askSize'),
+                    "fiftyDayAverage": format_number(info.get('fiftyDayAverage'), 2),
+                    "twoHundredDayAverage": format_number(info.get('twoHundredDayAverage'), 2),
+                    "change_from_50DMA": f"{calculate_change(current_price, info.get('fiftyDayAverage'))}%" if calculate_change(current_price, info.get('fiftyDayAverage')) else None,
+                    "change_from_200DMA": f"{calculate_change(current_price, info.get('twoHundredDayAverage'))}%" if calculate_change(current_price, info.get('twoHundredDayAverage')) else None,
+                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None
+                },
+                
                 "price_targets": {
                     "targetHighPrice": format_number(info.get('targetHighPrice'), 2),
                     "targetLowPrice": format_number(info.get('targetLowPrice'), 2),
@@ -245,23 +250,6 @@ class handler(BaseHTTPRequestHandler):
                     "trailingAnnualDividendYield": format_percentage(info.get('trailingAnnualDividendYield'))
                 },
                 
-                "trading_info": {
-                    "volume": info.get('volume'),
-                    "regularMarketVolume": info.get('regularMarketVolume'),
-                    "averageVolume": info.get('averageVolume'),
-                    "averageVolume10days": info.get('averageVolume10days'),
-                    "averageDailyVolume10Day": info.get('averageDailyVolume10Day'),
-                    "bid": format_number(info.get('bid'), 2),
-                    "ask": format_number(info.get('ask'), 2),
-                    "bidSize": info.get('bidSize'),
-                    "askSize": info.get('askSize'),
-                    "fiftyDayAverage": format_number(info.get('fiftyDayAverage'), 2),
-                    "twoHundredDayAverage": format_number(info.get('twoHundredDayAverage'), 2),
-                    "change_from_50DMA": f"{calculate_change(current_price, info.get('fiftyDayAverage'))}%" if calculate_change(current_price, info.get('fiftyDayAverage')) else None,
-                    "change_from_200DMA": f"{calculate_change(current_price, info.get('twoHundredDayAverage'))}%" if calculate_change(current_price, info.get('twoHundredDayAverage')) else None,
-                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None
-                },
-                
                 "earnings": {
                     "trailingEps": format_number(info.get('trailingEps'), 2),
                     "forwardEps": format_number(info.get('forwardEps'), 2),
@@ -270,6 +258,16 @@ class handler(BaseHTTPRequestHandler):
                     "trailingPegRatio": format_number(info.get('trailingPegRatio'), 2)
                 }
             }
+            
+                "company_business": {
+                    "logo_url": info.get('logo_url'),
+                    "shortName": info.get('shortName'),
+                    "longBusinessSummary": info.get('longBusinessSummary'),
+                    "sector": info.get('sector'),
+                    "industry": info.get('industry'),
+                    "website": info.get('website'),
+                },
+                
             
             # Send response
             self.wfile.write(json.dumps(organized_data, indent=2).encode())
