@@ -76,7 +76,26 @@ class handler(BaseHTTPRequestHandler):
             # Fetch ticker info
             ticker = yf.Ticker(ticker_symbol)
             info = ticker.info
+
+            # Fetch recent news
+            news_items = ticker.news
             
+            # Prepare recent news (last 8 items - most recent first)
+            recent_news = []
+            for item in news_items[:8]:  # take most recent 8
+                content = item.get('content', {})
+                click_url = content.get('clickThroughUrl', {}) or {}
+                
+                news_entry = {
+                    "title": content.get('title'),
+                    "summary": content.get('summary') or content.get('description') or "",
+                    "pubDate": content.get('pubDate'),
+                    "provider": content.get('provider', {}).get('displayName'),
+                    "url": click_url.get('url'),
+                    "isPremium": content.get('finance', {}).get('premiumFinance', {}).get('isPremiumNews', False)
+                }
+                recent_news.append(news_entry)
+                
              
             # Calculate one day change
             current_price = info.get('currentPrice') or info.get('regularMarketPrice')
@@ -267,6 +286,9 @@ class handler(BaseHTTPRequestHandler):
                     "industry": info.get('industry'),
                     "website": info.get('website'),
                 },
+
+                # ← NEW SECTION
+                "recent_news": recent_news,
             }
                 
             
