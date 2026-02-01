@@ -58,12 +58,6 @@ def calculate_change(current, previous):
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
-        # CRITICAL FIX: Set headers BEFORE processing data
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.end_headers()
-        
         try:
             # Parse query parameters
             query = urlparse(self.path).query
@@ -267,22 +261,22 @@ class handler(BaseHTTPRequestHandler):
                 }
             }
             
-            # Send response
+            
+            # Send successful response
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
             self.wfile.write(json.dumps(organized_data, indent=2).encode())
             
         except Exception as e:
             # Handle errors
-            error_response = {
+            self.send_response(500)
+            self.send_header('Content-type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
                 'error': str(e),
                 'ticker': ticker_symbol if 'ticker_symbol' in locals() else None,
                 'success': False
-            }
-            self.wfile.write(json.dumps(error_response).encode())
-    
-    def do_OPTIONS(self):
-        """Handle CORS preflight requests"""
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
+            }).encode())
