@@ -18,7 +18,7 @@ def format_billions(value):
         return None
     try:
         billions = float(value) / 1_000_000_000
-        return f"{round(billions, 2)} B$"
+        return f"{round(billions, 3)} B$"
     except (ValueError, TypeError):
         return None
 
@@ -28,7 +28,7 @@ def format_millions(value):
         return None
     try:
         millions = float(value) / 1_000_000
-        return f"{round(millions, 2)} M$"
+        return f"{round(millions, 2)} Mill."
     except (ValueError, TypeError):
         return None
 
@@ -55,20 +55,28 @@ def calculate_change(current, previous):
     except (ValueError, TypeError):
         return None
 
+# IMPORTANT: The class must be named exactly "handler" (lowercase)
 class handler(BaseHTTPRequestHandler):
     
     def do_GET(self):
+        # Set CORS headers first
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        
         try:
             # Parse query parameters
             query = urlparse(self.path).query
             params = parse_qs(query)
             
-            # Get ticker symbol from query params
+            # Get ticker symbol
             ticker_symbol = params.get('ticker', ['AAPL'])[0]
             
             # Fetch ticker info
             ticker = yf.Ticker(ticker_symbol)
             info = ticker.info
+            
             
             # Calculate one day change
             current_price = info.get('currentPrice') or info.get('regularMarketPrice')
@@ -87,12 +95,8 @@ class handler(BaseHTTPRequestHandler):
                 "main_info": {
                     "symbol": info.get('symbol'),
                     "shortName": info.get('shortName'),
-                    "sector": info.get('sector'),
-                    "industry": info.get('industry'),
-                    "currency": info.get('currency'),
                     "currentPrice": format_number(current_price, 2),
-                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None,
-                    "fiftyTwoWeekChange": fifty_two_week_change_pct
+                    "currency": info.get('currency'),
                     "marketCap": format_billions(info.get('marketCap')),
                     "PS": format_number(info.get('priceToSalesTrailing12Months'), 2),
                     "PE": format_number(info.get('trailingPE'), 2),
@@ -100,9 +104,12 @@ class handler(BaseHTTPRequestHandler):
                     "recommendation": info.get('recommendationKey'),
                     "PT_Low": format_number(info.get('targetLowPrice'), 2),
                     "PT_High": format_number(info.get('targetHighPrice'), 2),
+                    "oneDayChange": f"{one_day_change}%" if one_day_change is not None else None,
+                    "fiftyTwoWeekChange": fifty_two_week_change_pct
                 },
                 
                 "company_info": {
+                    "longBusinessSummary": info.get('longBusinessSummary'),
                     "website": info.get('website'),
                     "address1": info.get('address1'),
                     "city": info.get('city'),
@@ -117,10 +124,13 @@ class handler(BaseHTTPRequestHandler):
                     "fullTimeEmployees": info.get('fullTimeEmployees')
                 },
                 
-                "company_business": {
+                "card": {
                     "logo_url": info.get('logo_url'),
                     "shortName": info.get('shortName'),
-                    "longBusinessSummary": info.get('longBusinessSummary'),
+                    "symbol": info.get('symbol'),
+                    "currentPrice": format_number(current_price, 2),
+                    "currency": info.get('currency'),
+                    "marketCap": format_billions(info.get('marketCap')),
                     "sector": info.get('sector'),
                     "industry": info.get('industry'),
                     "website": info.get('website'),
@@ -261,22 +271,13 @@ class handler(BaseHTTPRequestHandler):
                 }
             }
             
-            
-            # Send successful response
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
+            # Send response
             self.wfile.write(json.dumps(organized_data, indent=2).encode())
             
+            
         except Exception as e:
-            # Handle errors
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                'error': str(e),
-                'ticker': ticker_symbol if 'ticker_symbol' in locals() else None,
-                'success': False
-            }).encode())
+            error_response = {
+                "error": str(e),
+                "success": False
+            }
+            self.wfile.write(json.dumps(error_response).encode())
