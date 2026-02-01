@@ -1,9 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/ticker.py",
-      "use": "@vercel/python"
+  "functions": {
+    "api/ticker.py": {
+      "runtime": "python3.9"
     }
-  ]
+  }
 }
